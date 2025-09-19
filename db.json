@@ -1,0 +1,22 @@
+{
+"mini-projects": [
+{
+"id": 1,
+"title": "Landing Page Clone",
+"description": "Create a responsive landing page for product X",
+"assignedTo": "toni",
+"priority": "high",
+"status": "inprogress",
+"dueDate": "2025-10-01"
+},
+{
+"id": 2,
+"title": "API Integration",
+"description": "Connect frontend with payments API",
+"assignedTo": "alex",
+"priority": "medium",
+"status": "todo",
+"dueDate": "2025-11-10"
+}
+]
+}
