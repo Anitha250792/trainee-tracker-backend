@@ -1,5 +1,3 @@
-# settings.py
-
 import os
 from pathlib import Path
 
@@ -17,7 +15,11 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").sp
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
+
 USE_TZ = True   # ✅ Removed USE_L10N (deprecated in Django 5.x)
+
+USE_TZ = True
+
 
 # --- INSTALLED APPS ---
 INSTALLED_APPS = [
@@ -34,13 +36,23 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'corsheaders',   # ✅ Added for CORS
+
+    'tracker',          # your app
+    'rest_framework',   # DRF
+    'corsheaders',      # for CORS
+
 ]
 
 # --- MIDDLEWARE ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
     'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ for static files on Render
     'corsheaders.middleware.CorsMiddleware',       # ✅ for CORS
+
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # must be high up
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -49,7 +61,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'trainee_tracker.urls'
+
+# --- URLS / WSGI ---
+ROOT_URLCONF = 'trainee_tracker.urls'
+WSGI_APPLICATION = 'trainee_tracker.wsgi.application'
+
 
 # --- TEMPLATES ---
 TEMPLATES = [
@@ -68,9 +86,11 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'trainee_tracker.wsgi.application'  # ✅ fixed underscore
 
-# --- DATABASE (PostgreSQL for Render) ---
+# --- DATABASE (PostgreSQL for Render) --
+# --- DATABASE (Render Postgres) ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -90,23 +110,32 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# --- STATIC FILES (CSS, JS, images) ---
+# --- STATIC FILES ---
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# --- MEDIA FILES (uploads) ---
+# --- MEDIA FILES ---
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
 # --- DEFAULT PRIMARY KEY ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # --- CORS (Frontend access from Vercel) ---
+
+# --- CORS / CSRF ---
+
 CORS_ALLOWED_ORIGINS = [
     "https://trainee-tracker-frontend.vercel.app",
 ]
+CSRF_TRUSTED_ORIGINS = ["https://trainee-tracker-frontend.vercel.app"]
+
 
 # --- SECURITY (adjust after first deploy) ---
 CSRF_TRUSTED_ORIGINS = ["https://trainee-tracker-frontend.vercel.app"]
@@ -115,4 +144,12 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # SECURE_SSL_REDIRECT = True   # 🔴 Enable later after HTTPS is working
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# --- SECURITY ---
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
 X_FRAME_OPTIONS = "DENY"
