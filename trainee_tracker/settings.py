@@ -1,5 +1,3 @@
-# settings.py
-
 import os
 from pathlib import Path
 
@@ -8,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- SECURITY ---
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "your-default-secret-key")
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
 
 # --- ALLOWED HOSTS ---
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(" ")
@@ -17,7 +15,6 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").sp
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # --- INSTALLED APPS ---
@@ -28,14 +25,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # your apps
-    'rest_framework',  # if using DRF
+    'tracker',          # your app
+    'rest_framework',   # DRF
+    'corsheaders',      # for CORS
 ]
 
 # --- MIDDLEWARE ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # for static files on Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # must be high up
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -44,13 +43,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'your_project.urls'
+# --- URLS / WSGI ---
+ROOT_URLCONF = 'trainee_tracker.urls'
+WSGI_APPLICATION = 'trainee_tracker.wsgi.application'
 
 # --- TEMPLATES ---
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],  # optional: if you have templates
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,9 +64,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'your_project.wsgi.application'
-
-# --- DATABASE (PostgreSQL recommended for Render) ---
+# --- DATABASE (Render Postgres) ---
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -79,43 +78,34 @@ DATABASES = {
 
 # --- PASSWORD VALIDATION ---
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# --- STATIC FILES (CSS, JS, images) ---
+# --- STATIC FILES ---
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]  # optional: for local static files
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# --- MEDIA FILES (uploads) ---
+# --- MEDIA FILES ---
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
 # --- DEFAULT PRIMARY KEY ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- CORS (optional, if frontend on Vercel needs API access) ---
+# --- CORS / CSRF ---
 CORS_ALLOWED_ORIGINS = [
-    "https://your-frontend.vercel.app",
+    "https://trainee-tracker-frontend.vercel.app",
 ]
+CSRF_TRUSTED_ORIGINS = ["https://trainee-tracker-frontend.vercel.app"]
 
-# --- SECURITY (optional but recommended) ---
-CSRF_TRUSTED_ORIGINS = ["https://your-frontend.vercel.app"]
+# --- SECURITY ---
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 X_FRAME_OPTIONS = "DENY"
